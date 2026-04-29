@@ -1,0 +1,11 @@
+torch
+torchvision
+transformers
+timm
+einops
+albumentations
+Pillow
+numpy
+tqdm
+onnx
+onnxruntime

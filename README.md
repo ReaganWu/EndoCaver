@@ -1,94 +1,186 @@
-# EndoCaver
+# EndoCaver: Handling Fog, Blur and Glare in Endoscopic Images via Joint Deblurring-Segmentation
 
-This repository provides the **official reference implementation** of **EndoCaver**, a lightweight dual-decoder transformer framework accepted by **IEEE ICASSP 2026**.
+[![Paper](https://img.shields.io/badge/Paper-ICASSP%202026-blue)](https://ieeexplore.ieee.org/document/11461918)
+[![Arxiv](https://img.shields.io/badge/arXiv-2601.22537-red)](https://arxiv.org/pdf/2601.22537)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **EndoCaver: Handling Fog, Blur and Glare in Endoscopic Images via Joint Deblurring–Segmentation**  
-> Zhuoyu Wu, Wenhui Ou, Pei-Sze Tan, Jiayan Yang, Wenqi Fang, Zheng Wang, Raphaël C.-W. Phan  
-> *Accepted by IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 2026*
+**Official PyTorch implementation of EndoCaver (ICASSP 2026)**
 
----
+> **EndoCaver: Handling Fog, Blur and Glare in Endoscopic Images via Joint Deblurring-Segmentation**
+> Zhuoyu Wu, Wenhui Ou, Pei-Sze Tan, Jiayan Yang, Wenqi Fang, Zheng Wang, Raphaël C.-W. Phan
 
-## Overview
+Accepted at IEEE ICASSP 2026. 
 
-Endoscopic image analysis in real-world clinical environments is frequently affected by **lens fogging, motion blur, and specular highlights**, which significantly degrade the reliability of automated polyp segmentation systems.
+EndoCaver is a lightweight dual-decoder transformer for robust endoscopic image analysis under fog, motion blur, and specular glare. Given a degraded endoscopic image, the model jointly predicts:
 
-**EndoCaver** addresses this challenge through a **joint deblurring–segmentation framework** that is explicitly designed for **robustness under image degradation** and **resource-constrained clinical deployment**.
+1. a restored RGB image
+2. a polyp segmentation mask
 
-The core design philosophy of EndoCaver is to:
-- Preserve **task synergy** between restoration and segmentation,
-- Avoid excessive architectural complexity,
-- Maintain **strong parameter efficiency** without sacrificing performance.
 
----
+## Qualitative results
 
-## Key Contributions
+Kvasir Eval Set:
 
-- **Unidirectional-Guided Dual-Decoder Architecture**  
-  A lightweight dual-decoder design where deblurring cues are explicitly transferred to the segmentation pathway, avoiding bidirectional interference and unnecessary redundancy.
+![Kvasir Eval Set](assets/kvasir_eval_set.gif)
 
-- **Global Attention Module (GAM)**  
-  A cross-scale aggregation mechanism that unifies multi-level encoder features into a global representation, enhancing structural awareness with minimal computational overhead.
+OOD / PolypGen sequence example:
 
-- **Deblurring–Segmentation Aligner (DSA)**  
-  A cross-attention based alignment module that injects restoration priors into segmentation, improving boundary integrity and robustness under severe degradations.
+![OOD PolypGen](assets/ood_polypgen_seq22.gif)
 
-- **LoCoS: Cosine-Annealed Multi-Task Optimization**  
-  A task-adaptive loss weighting strategy that stabilizes joint optimization by progressively shifting focus from deblurring to segmentation.
+## Highlights
 
----
+- Joint deblurring and segmentation in one network
+- Unidirectional deblurring-to-segmentation guidance
+- Global Attention Module (GAM) for cross-scale aggregation
+- Deblurring-Segmentation Aligner (DSA) for restoration-guided segmentation
+- Compact model design for deployment-oriented endoscopic analysis
 
-## Method Summary
+Paper-reported reference numbers:
 
-Given an input endoscopic image affected by real-world degradations, EndoCaver jointly predicts:
-- a restored (deblurred) image, and
-- a corresponding segmentation mask,
+- Parameters: 7.8M
+- Complexity: 11.9 GMACs
+- Kvasir-SEG clean Dice: 0.922
+- Severe degradation Dice: 0.889
 
-within a **single unified network**.
+<img src="assets/Perf_Endocaver_AvgDice.png"
+     width="300"
+     style="display: block; margin: auto;">
 
-The framework consists of:
-- a lightweight hierarchical transformer encoder,
-- a Global Attention Module for cross-scale enhancement,
-- a **deblurring decoder** responsible for restoration,
-- a **segmentation decoder** guided by aligned restoration features.
+## Installation
 
-This unidirectional guidance enables effective information transfer while maintaining architectural simplicity.
+```bash
+git clone https://github.com/ReaganWu/EndoCaver.git
+cd EndoCaver
+pip install -r requirements.txt
+```
 
----
+## Checkpoint and ONNX artifacts
 
-## Efficiency and Robustness
+The release includes paper-aligned artifact names:
 
-EndoCaver is explicitly optimized for clinical deployment scenarios:
+```text
+checkpoints/EndoCaver_MiTB0_GAM_DSA_LoCoS_Kvasir.pt
+checkpoints/EndoCaver_MiTB0_GAM_DSA_LoCoS_Kvasir.onnx
+```
 
-- **Parameters**: 7.8M  
-- **Computational Complexity**: 11.9 GMACs  
-- **Performance**:
-  - Dice 0.922 on clean Kvasir-SEG
-  - Dice 0.889 under severe synthetic degradations
+The name follows the arXiv description: EndoCaver with a MiT-B0 encoder, GAM, DSA, and LoCoS-style multi-task optimisation on Kvasir.
 
-Despite its compact size, EndoCaver demonstrates superior robustness compared to substantially larger state-of-the-art models.
+## Quick inference
 
----
+Run the included Kvasir samples:
 
-## Code Availability
+```bash
+python scripts/infer.py \
+  --local-files-only \
+  --images samples/kvasir/images \
+  --checkpoint checkpoints/EndoCaver_MiTB0_GAM_DSA_LoCoS_Kvasir.pt \
+  --out samples/kvasir/outputs
+```
 
-This repository is released as a **research reference** to support transparency and reproducibility of the proposed method.
+The repository already includes two sample inputs and example outputs:
 
-- The code focuses on **core architectural components** (GAM, DSA, LoCoS).
-- Training pipelines, datasets, and deployment scripts are **not provided** in this repository.
-- The implementation is intended for **method-level understanding and academic reference**, rather than direct end-to-end reproduction.
+```text
+samples/kvasir/images/
+samples/kvasir/outputs/restored/
+samples/kvasir/outputs/masks/
+```
 
----
 
-## Paper and Citation
 
-A preprint version of the paper will be available on **arXiv**.
+| Runtime | Device / Provider | Iterations | Avg. Latency | FPS |
+| --- | --- | ---: | ---: | ---: |
+| PyTorch checkpoint | NVIDIA A100 40GB | 5 | 36.22 ms | 27.61 |
+| ONNX Runtime CPU | CPUExecutionProvider | 3 | 162.90 ms | 6.14 |
+| ONNX Runtime GPU | CUDAExecutionProvider (A100) | 5 | 11.41 ms (-68% latency compared with Torch.eval) | 87.65 |
 
-If you find this work useful, please consider citing:
+
+Example sample image:
+
+![Kvasir sample](samples/kvasir/images/kvasir_sample_01.png)
+
+## Minimal training example
+
+This repository includes a compact Kvasir-only training example. It is intended as a simple reference for data format and model usage.
+
+Expected Kvasir layout:
+
+```text
+Kvasir-SEG/
+  images/
+    xxx.jpg
+  masks/
+    xxx.jpg
+```
+
+Run:
+
+```bash
+python train.py \
+  --data /path/to/Kvasir-SEG \
+  --epochs 3000 \
+  --batch-size 16 \
+  --out checkpoints/EndoCaver_MiTB0_GAM_DSA_LoCoS_Kvasir.pt
+```
+
+For details, see `docs/TRAINING.md`.
+
+## Model usage
+
+```python
+import torch
+from endocaver import EndoCaver
+
+model = EndoCaver().eval()
+x = torch.randn(1, 3, 224, 224)
+
+with torch.no_grad():
+    restored_rgb, seg_prob = model(x)
+
+print(restored_rgb.shape)  # [1, 3, 224, 224]
+print(seg_prob.shape)      # [1, 1, 224, 224]
+```
+
+## Repository structure
+
+```text
+EndoCaver/
+  endocaver/
+    model.py          # GAM, DSA, dual decoders, EndoCaver model
+    data.py           # small Kvasir-style dataset helper
+  scripts/
+    infer.py          # folder inference example
+  checkpoints/        # paper-aligned PT and ONNX artifacts
+  samples/kvasir/     # two sample Kvasir images and example outputs
+  assets/             # README GIFs and qualitative examples
+  docs/
+    TRAINING.md       # compact Kvasir training note
+    RUNTIME.md        # PT/ONNX runtime check commands and numbers
+    CITATION.md       # citation information
+  train.py            # single-file Kvasir training example
+```
+
+## Citation
 
 ```bibtex
 @inproceedings{wu2026endocaver,
-  title={EndoCaver: Handling Fog, Blur and Glare in Endoscopic Images via Joint Deblurring--Segmentation},
+  title={EndoCaver: Handling Fog, Blur and Glare in Endoscopic Images via Joint Deblurring-Segmentation},
   author={Wu, Zhuoyu and Ou, Wenhui and Tan, Pei-Sze and Yang, Jiayan and Fang, Wenqi and Wang, Zheng and Phan, Rapha{\"e}l C.-W.},
   booktitle={IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
   year={2026}
 }
+
+@article{wu2026endocaver,
+  title={EndoCaver: Handling Fog, Blur and Glare in Endoscopic Images via Joint Deblurring-Segmentation},
+  author={Wu, Zhuoyu and Ou, Wenhui and Tan, Pei-Sze and Yang, Jiayan and Fang, Wenqi and Wang, Zheng and Phan, Rapha{\"e}l C-W},
+  journal={arXiv preprint arXiv:2601.22537},
+  year={2026}
+}
+```
+
+## Acknowledgements
+
+This implementation uses PyTorch, timm, Hugging Face Transformers, Albumentations, and einops.
+
+## License
+
+See `LICENSE`.

@@ -1,0 +1,80 @@
+[
+  {
+    "mode": "pt",
+    "runtime": "PyTorch",
+    "provider_or_device": "cuda:0",
+    "image": "samples/kvasir/images/kvasir_sample_01.png",
+    "iterations": 5,
+    "avg_latency_ms": 36.22471960261464,
+    "fps": 27.605458674905012,
+    "deblur_shape": [
+      1,
+      3,
+      224,
+      224
+    ],
+    "segmentation_shape": [
+      1,
+      1,
+      224,
+      224
+    ],
+    "deblur_min": 9.869715540844481e-06,
+    "deblur_max": 0.9922863245010376,
+    "segmentation_min": 2.0729561860132797e-33,
+    "segmentation_max": 1.0,
+    "segmentation_mean": 0.02529318258166313
+  },
+  {
+    "mode": "onnx-cpu",
+    "runtime": "ONNX Runtime",
+    "provider_or_device": "CPUExecutionProvider",
+    "image": "samples/kvasir/images/kvasir_sample_01.png",
+    "iterations": 3,
+    "avg_latency_ms": 162.90208837017417,
+    "fps": 6.13865672321909,
+    "deblur_shape": [
+      1,
+      3,
+      224,
+      224
+    ],
+    "segmentation_shape": [
+      1,
+      1,
+      224,
+      224
+    ],
+    "deblur_min": 9.864568710327148e-06,
+    "deblur_max": 0.9922731518745422,
+    "segmentation_min": 0.0,
+    "segmentation_max": 1.0,
+    "segmentation_mean": 0.025291575118899345
+  },
+  {
+    "mode": "onnx-gpu",
+    "runtime": "ONNX Runtime",
+    "provider_or_device": "CUDAExecutionProvider",
+    "image": "samples/kvasir/images/kvasir_sample_01.png",
+    "iterations": 5,
+    "avg_latency_ms": 11.408771015703678,
+    "fps": 87.65186001397902,
+    "deblur_shape": [
+      1,
+      3,
+      224,
+      224
+    ],
+    "segmentation_shape": [
+      1,
+      1,
+      224,
+      224
+    ],
+    "deblur_min": 9.775161743164062e-06,
+    "deblur_max": 0.9922813773155212,
+    "segmentation_min": 0.0,
+    "segmentation_max": 1.0,
+    "segmentation_mean": 0.025291580706834793
+  }
+]
