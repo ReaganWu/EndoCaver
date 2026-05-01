@@ -9,13 +9,12 @@
 > **EndoCaver: Handling Fog, Blur and Glare in Endoscopic Images via Joint Deblurring-Segmentation**
 > Zhuoyu Wu, Wenhui Ou, Pei-Sze Tan, Jiayan Yang, Wenqi Fang, Zheng Wang, Raphaël C.-W. Phan
 
-Accepted at IEEE ICASSP 2026. 
+Accepted at IEEE ICASSP 2026.
 
 EndoCaver is a lightweight dual-decoder transformer for robust endoscopic image analysis under fog, motion blur, and specular glare. Given a degraded endoscopic image, the model jointly predicts:
 
 1. a restored RGB image
 2. a polyp segmentation mask
-
 
 ## Qualitative results
 
@@ -26,6 +25,8 @@ Kvasir Eval Set:
 OOD / PolypGen sequence example:
 
 ![OOD PolypGen](assets/ood_polypgen_seq22.gif)
+
+![OOD PolypGen Perf](assets/ood_polypgen_seq22_detail.png)
 
 ## Highlights
 
@@ -42,9 +43,9 @@ Paper-reported reference numbers:
 - Kvasir-SEG clean Dice: 0.922
 - Severe degradation Dice: 0.889
 
-<img src="assets/Perf_Endocaver_AvgDice.png"
+`<img src="assets/Perf_Endocaver_AvgDice.png"
      width="300"
-     style="display: block; margin: auto;">
+     style="display: block; margin: auto;">`
 
 ## Installation
 
@@ -85,14 +86,11 @@ samples/kvasir/outputs/restored/
 samples/kvasir/outputs/masks/
 ```
 
-
-
-| Runtime | Device / Provider | Iterations | Avg. Latency | FPS |
-| --- | --- | ---: | ---: | ---: |
-| PyTorch checkpoint | NVIDIA A100 40GB | 5 | 36.22 ms | 27.61 |
-| ONNX Runtime CPU | CPUExecutionProvider | 3 | 162.90 ms | 6.14 |
-| ONNX Runtime GPU | CUDAExecutionProvider (A100) | 5 | 11.41 ms (-68% latency compared with Torch.eval) | 87.65 |
-
+| Runtime            | Device / Provider            | Iterations |                                     Avg. Latency |   FPS |
+| ------------------ | ---------------------------- | ---------: | -----------------------------------------------: | ----: |
+| PyTorch checkpoint | NVIDIA A100 40GB             |          5 |                                         36.22 ms | 27.61 |
+| ONNX Runtime CPU   | CPUExecutionProvider         |          3 |                                        162.90 ms |  6.14 |
+| ONNX Runtime GPU   | CUDAExecutionProvider (A100) |          5 | 11.41 ms (-68% latency compared with Torch.eval) | 87.65 |
 
 Example sample image:
 
